@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Guess the Animal</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+
+    <main class="game-container">
+
+        <header class="game-header">
+            <div class="animal-icon">🦁</div>
+            <p class="eyebrow">ANIMAL CHALLENGE</p>
+            <h1>Guess the <span>Animal!</span></h1>
+            <p class="subtitle">
+                Test your animal knowledge, one letter at a time.
+            </p>
+        </header>
+
+        <section class="score-card">
+            <div class="score-item">
+                <span class="score-icon">⭐</span>
+                <div>
+                    <p>Score</p>
+                    <h2>{{ score }}</h2>
+                </div>
+            </div>
+
+            <div class="score-item">
+                <span class="score-icon">❌</span>
+                <div>
+                    <p>Wrong guesses</p>
+                    <h2>{{ wrong|length }} / 10</h2>
+                </div>
+            </div>
+        </section>
+
+        <section class="word-card">
+            <p class="section-label">MYSTERY ANIMAL</p>
+
+            <div class="word-display">
+                {% for letter in display_word %}
+                    <span class="letter-box">
+                        {{ letter if letter != '_' else '' }}
+                    </span>
+                {% endfor %}
+            </div>
+
+            <p class="hint">
+                The animal has {{ display_word|length }} letters.
+            </p>
+        </section>
+
+        <section class="guess-card">
+            <h2>Choose a letter</h2>
+            <p class="hint">Select a letter below or type one.</p>
+
+            <div class="alphabet">
+                {% for letter in alphabet %}
+                    <form action="{{ url_for('guess') }}"
+                          method="POST"
+                          class="letter-form">
+
+                        <button
+                            type="submit"
+                            name="letter"
+                            value="{{ letter }}"
+                            class="letter-button
+                            {% if letter in guessed %}correct{% endif %}
+                            {% if letter in wrong %}incorrect{% endif %}"
+                            {% if letter in guessed or letter in wrong or status != 'playing' %}
+                                disabled
+                            {% endif %}>
+                            {{ letter }}
+                        </button>
+
+                    </form>
+                {% endfor %}
+            </div>
+
+            <form action="{{ url_for('guess') }}"
+                  method="POST"
+                  class="manual-guess">
+
+                <input
+                    type="text"
+                    name="letter"
+                    maxlength="1"
+                    placeholder="Type a letter..."
+                    autocomplete="off"
+                    required
+                    {% if status != 'playing' %}disabled{% endif %}>
+
+                <button
+                    type="submit"
+                    class="guess-button"
+                    {% if status != 'playing' %}disabled{% endif %}>
+                    Guess
+                </button>
+            </form>
+
+            <div class="message
+                {% if status == 'won' %}success{% endif %}">
+                {{ message }}
+            </div>
+        </section>
+
+        {% if status == 'won' %}
+            <section class="result-card">
+                <h2>🎉 You did it!</h2>
+                <p>
+                    You guessed
+                    <strong>{{ session['word']|title }}</strong> correctly!
+                </p>
+
+                <form action="{{ url_for('new_game') }}" method="POST">
+                    <button class="new-game-button" type="submit">
+                        Play Again
+                    </button>
+                </form>
+            </section>
+        {% endif %}
+
+        {% if status == 'playing' %}
+            <form action="{{ url_for('new_game') }}"
+                  method="POST"
+                  class="restart-form">
+                <button type="submit" class="restart-button">
+                    ↻ Start a New Game
+                </button>
+            </form>
+        {% endif %}
+
+        
+<footer>
+    <p>Think carefully. Guess wisely. Have fun! 🐾</p>
+    <p class="credit">Created by <strong>Cypher@2026</strong> ©</p>
+</footer>
+
+
+    </main>
+
+</body>
+</html>
